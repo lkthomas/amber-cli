@@ -1,4 +1,6 @@
 use anyhow::Result;
+use chrono::{prelude::*, Days};
+use dateparser::parse;
 
 use amber_client::app_config::AppConfig;
 use amber_client::rest_client::RestClient;
@@ -39,7 +41,7 @@ async fn main() -> Result<()> {
 
     // end current price details
 
-    // get usage dat
+    // get usage data
     let usage_data_url = format!(
         "{}/sites/{}/usage?startDate=2023-09-12&endDate=2023-09-13&resolution=30'",
         base_url, site_id
@@ -65,7 +67,19 @@ async fn main() -> Result<()> {
     );
     println!("Overall rate status: {}", &current_price_data.descriptor);
     println!("-------------------------------------------------------------------");
-    //println!("{:#?}", usage_data);
+
+    let test_date = ("2023-09-14");
+    let date_parse = parse(test_date)?;
+    println!("{:#?}", date_parse.date_naive());
+    let yesterdays_date = date_parse
+        .date_naive()
+        .checked_sub_days(Days::new(1))
+        .expect("fuck");
+
+    println!("{:#?}", yesterdays_date);
+
+    let todays_date = chrono::offset::Local::now();
+    println!("{:#?}", todays_date.date_naive());
 
     Ok(())
 }
