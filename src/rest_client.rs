@@ -3,7 +3,7 @@ use iso8601_timestamp::Timestamp;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SiteDetails {
     pub active_from: Timestamp,
@@ -14,7 +14,7 @@ pub struct SiteDetails {
     pub status: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct SiteChannels {
     pub identifier: String,
     pub tariff: String,
