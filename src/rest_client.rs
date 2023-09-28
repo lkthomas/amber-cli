@@ -1,7 +1,8 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use iso8601_timestamp::Timestamp;
-use reqwest::Client;
+use reqwest::{Client, Response};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -79,6 +80,18 @@ pub struct RestClient {
     pub client: reqwest::Client,
 }
 
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("HTTP Request failed: {0}")]
+    ReqwestError(#[from] reqwest::Error),
+
+    #[error("Serde failed to decode json: {0}")]
+    SerdeJsonError(#[from] serde_json::Error),
+
+    #[error("Received a non 200 status code of {status_code:?} with message body: {body:?} ")]
+    HttpNon200Status { status_code: String, body: String },
+}
+
 impl RestClient {
     pub fn new_client(url: String, auth_token: String) -> Self {
         Self {
@@ -88,7 +101,7 @@ impl RestClient {
         }
     }
 
-    pub async fn get_site_data(&mut self) -> Result<Vec<SiteDetails>> {
+    pub async fn get_site_data(&mut self) -> Result<Vec<SiteDetails>, Error> {
         let auth_token_header = format!("Bearer {}", &self.auth_token);
 
         let response = self
@@ -98,11 +111,20 @@ impl RestClient {
             .header("CONTENT_TYPE", "application/json")
             .header("ACCEPT", "application/json")
             .send()
-            .await?
-            .json::<Vec<SiteDetails>>()
             .await?;
-
-        Ok(response)
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let response = response.json::<Vec<SiteDetails>>().await?;
+                return Ok(response);
+            }
+            //_ => return Err(Error::FuckedOut(response.status().to_string())),
+            _ => {
+                return Err(Error::HttpNon200Status {
+                    status_code: (response.status().to_string()),
+                    body: (response.text().await)?,
+                })
+            }
+        }
     }
 
     pub async fn get_current_price_data(&mut self) -> Result<Vec<CurrentPrices>> {

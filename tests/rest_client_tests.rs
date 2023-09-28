@@ -1,4 +1,4 @@
-use amber_client::rest_client::RestClient;
+use amber_client::rest_client::{Error, RestClient};
 
 use wiremock::matchers::{header, method};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -57,7 +57,7 @@ async fn ensure_correct_headers_are_present_and_get_called_once() {
 }
 
 #[tokio::test]
-async fn test_valid_json_parsing_for_site_details() {
+async fn valid_json_parsing_for_site_details() {
     let mock_server = MockServer::start().await;
     let template = ResponseTemplate::new(200)
         .set_body_raw(mock_data::amber_site_details_json(), "application/json");
@@ -77,9 +77,10 @@ async fn test_valid_json_parsing_for_site_details() {
     assert_eq!(test_user_site_data, &mock_data::site_details_json_struct());
 }
 #[tokio::test]
-async fn test_unauthorized_api_access() {
+#[should_panic(expected = "401 Unauthorized")]
+async fn unauthorized_api_access() {
     let mock_server = MockServer::start().await;
-    let template = ResponseTemplate::new(200)
+    let template = ResponseTemplate::new(401)
         .set_body_raw(mock_data::amber_401_unauthorized(), "application/json");
     let mut unauthorized_access = RestClient::new_client(mock_server.uri(), "token".to_string());
 
@@ -88,7 +89,5 @@ async fn test_unauthorized_api_access() {
         .mount(&mock_server)
         .await;
 
-    let unauthorized_access_request = unauthorized_access.get_site_data().await.unwrap();
-
-    println!("{:#?}", unauthorized_access_request);
+    let _test_site_details_request = unauthorized_access.get_site_data().await.unwrap();
 }
