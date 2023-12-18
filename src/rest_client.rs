@@ -1,10 +1,10 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use iso8601_timestamp::Timestamp;
-use reqwest::{Client, Response};
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SiteDetails {
     pub active_from: Timestamp,
@@ -15,7 +15,7 @@ pub struct SiteDetails {
     pub status: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct SiteChannels {
     pub identifier: String,
     pub tariff: String,
@@ -24,7 +24,7 @@ pub struct SiteChannels {
     pub tariff_type: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CurrentPrices {
     // type is a reserved word, so rename it.
@@ -45,7 +45,7 @@ pub struct CurrentPrices {
     pub estimate: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TariffInformation {
     pub period: String,
 }
@@ -101,6 +101,10 @@ impl RestClient {
         }
     }
 
+    //    async fn rest_requestor() {
+    //
+    //    }
+
     pub async fn get_site_data(&mut self) -> Result<Vec<SiteDetails>, Error> {
         let auth_token_header = format!("Bearer {}", &self.auth_token);
 
@@ -117,7 +121,6 @@ impl RestClient {
                 let response = response.json::<Vec<SiteDetails>>().await?;
                 return Ok(response);
             }
-            //_ => return Err(Error::FuckedOut(response.status().to_string())),
             _ => {
                 return Err(Error::HttpNon200Status {
                     status_code: (response.status().to_string()),

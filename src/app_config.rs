@@ -22,9 +22,9 @@ pub struct AppConfig {
 }
 
 impl AppConfig {
-    pub async fn get() -> Result<Self, ConfigError> {
+    pub async fn get(app_config_file: String) -> Result<Self, ConfigError> {
         let config = Config::builder()
-            .add_source(File::with_name("config.toml"))
+            .add_source(File::with_name(&app_config_file))
             .build()?;
 
         config.try_deserialize()

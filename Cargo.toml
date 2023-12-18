@@ -16,6 +16,7 @@ config = "0.13.1"
 chrono = "0.4.30"
 dateparser = "0.2.0"
 thiserror = "1.0.48"
+clap = { version = "4.4.11", features = ["derive"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt", "macros"] }

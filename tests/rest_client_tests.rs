@@ -1,4 +1,4 @@
-use amber_client::rest_client::{Error, RestClient};
+use amber_client::rest_client::RestClient;
 
 use wiremock::matchers::{header, method};
 use wiremock::{Mock, MockServer, ResponseTemplate};
