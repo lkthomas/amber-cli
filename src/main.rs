@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use clap::{Parser, Subcommand};
 
 use amber_client::app_config::AppConfig;
@@ -39,14 +39,25 @@ async fn main() -> Result<()> {
     let auth_token = config.apitoken.psk;
     let base_url = config.amberconfig.base_url;
 
-    // get site details
+    match cli_args.command {
+        Commands::CurrentPrice => {
+            println!("current price");
+        }
+        Commands::SiteDetails => {
+            site_details(base_url, auth_token).await?;
+        }
 
-    // let user_site_data = get_site_data();
-    let user_site_data = get_site_data(base_url, auth_token).await?;
+        Commands::Usage => {
+            println!("usage");
+        }
+    }
 
-    let site_id = user_site_data.id;
-
-    println!("{:?}", site_id);
+    async fn site_details(base_url: String, auth_token: String) -> Result<()> {
+        let user_site_data = get_site_data(base_url, auth_token).await?;
+        let site_id = user_site_data.id;
+        println!("{:?}", site_id);
+        Ok(())
+    }
 
     Ok(())
 }
