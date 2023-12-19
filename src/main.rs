@@ -4,7 +4,7 @@ use anyhow::{Ok, Result};
 use clap::{Parser, Subcommand};
 
 use amber_client::app_config::AppConfig;
-use amber_client::get_site_data;
+use amber_client::{get_current_prices, get_site_data};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -39,24 +39,30 @@ async fn main() -> Result<()> {
     let auth_token = config.apitoken.psk;
     let base_url = config.amberconfig.base_url;
 
+    // set up Site ID, reduce API calls and the API only supports one site ID per user.
+    let site_id = get_user_site_id(base_url.clone(), auth_token.clone()).await?;
+
     match cli_args.command {
         Commands::CurrentPrice => {
-            println!("current price");
+            let current_price_data = get_current_prices(base_url, auth_token, site_id).await?;
+            let current_price_data_json = serde_json::to_string(&current_price_data)?;
+            println!("{}", current_price_data_json);
         }
         Commands::SiteDetails => {
-            site_details(base_url, auth_token).await?;
+           let site_data = get_site_data(base_url, auth_token).await?;
+           let site_data_json = serde_json::to_string(&site_data)?;
+           println!("{}", site_data_json);
         }
 
         Commands::Usage => {
-            println!("usage");
+            println!("not done yet");
         }
     }
 
-    async fn site_details(base_url: String, auth_token: String) -> Result<()> {
+    async fn get_user_site_id(base_url: String, auth_token: String) -> Result<String> {
         let user_site_data = get_site_data(base_url, auth_token).await?;
-        let site_id = user_site_data.id;
-        println!("{:?}", site_id);
-        Ok(())
+        let user_site_id = user_site_data.id;
+        Ok(user_site_id)
     }
 
     Ok(())

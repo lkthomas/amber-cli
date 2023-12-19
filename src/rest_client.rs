@@ -50,7 +50,7 @@ pub struct TariffInformation {
     pub period: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CurrentUsage {
     #[serde(rename = "type")]
