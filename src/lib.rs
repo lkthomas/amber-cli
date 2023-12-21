@@ -67,4 +67,3 @@ pub async fn get_current_prices(
 // let usage_data = usage_details.get_usage_data().await?;
 // Ok(())
 // }
-1
