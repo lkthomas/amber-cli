@@ -40,7 +40,7 @@ pub async fn get_current_prices(
         base_url, site_id
     );
     let mut current_price_details = RestClient::new_client(current_price_url, auth_token.clone());
-    let current_price_data = current_price_details.get_current_price_data().await?;
+    let current_price_data = current_price_details.get_price_data().await?;
 
     // One site can only have one set of current prices so extract from arrayw
     let current_price_data = current_price_data

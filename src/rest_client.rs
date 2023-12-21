@@ -130,7 +130,7 @@ impl RestClient {
         }
     }
 
-    pub async fn get_current_price_data(&mut self) -> Result<Vec<CurrentPrices>> {
+    pub async fn get_price_data(&mut self) -> Result<Vec<CurrentPrices>> {
         let auth_token_header = format!("Bearer {}", &self.auth_token);
 
         let response = self
