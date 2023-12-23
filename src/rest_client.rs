@@ -42,7 +42,7 @@ pub struct CurrentPrices {
     pub spike_status: String,
     pub tariff_information: TariffInformation,
     pub descriptor: String,
-    pub estimate: bool,
+    pub estimate: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

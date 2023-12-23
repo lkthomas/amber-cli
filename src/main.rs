@@ -4,7 +4,7 @@ use anyhow::{Ok, Result};
 use clap::{Parser, Subcommand};
 
 use amber_client::app_config::AppConfig;
-use amber_client::{get_current_prices, get_site_data};
+use amber_client::{get_prices, get_site_data, get_usage_by_date, get_user_site_id};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -16,11 +16,29 @@ struct Cli {
     command: Commands,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 enum Commands {
     SiteDetails,
-    CurrentPrice,
-    Usage,
+    #[command(subcommand)]
+    CurrentPrice(Window),
+    #[command(subcommand)]
+    Usage(Dates),
+}
+
+#[derive(Parser, Debug)]
+enum Window {
+    Current,
+    Previous,
+    Next,
+}
+
+// #[derive(Parser, Debug)]
+#[derive(Clone, Debug, Subcommand)]
+enum Dates {
+    DateRange {
+        start_date: String,
+        end_date: String,
+    },
 }
 
 #[tokio::main]
@@ -43,26 +61,41 @@ async fn main() -> Result<()> {
     let site_id = get_user_site_id(base_url.clone(), auth_token.clone()).await?;
 
     match cli_args.command {
-        Commands::CurrentPrice => {
-            let current_price_data = get_current_prices(base_url, auth_token, site_id).await?;
+        Commands::CurrentPrice(Window::Current) => {
+            let _window = "current".to_string();
+            let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
             let current_price_data_json = serde_json::to_string(&current_price_data)?;
             println!("{}", current_price_data_json);
         }
+        Commands::CurrentPrice(Window::Previous) => {
+            let _window = "current?previous=1".to_string();
+            let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
+            let current_price_data_json = serde_json::to_string(&current_price_data)?;
+            println!("{}", current_price_data_json);
+        }
+
+        Commands::CurrentPrice(Window::Next) => {
+            let _window = "current?next=1".to_string();
+            let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
+            let current_price_data_json = serde_json::to_string(&current_price_data)?;
+            println!("{}", current_price_data_json);
+        }
+
         Commands::SiteDetails => {
-           let site_data = get_site_data(base_url, auth_token).await?;
-           let site_data_json = serde_json::to_string(&site_data)?;
-           println!("{}", site_data_json);
+            let site_data = get_site_data(base_url, auth_token).await?;
+            let site_data_json = serde_json::to_string(&site_data)?;
+            println!("{}", site_data_json);
         }
 
-        Commands::Usage => {
-            println!("not done yet");
+        Commands::Usage(Dates::DateRange {
+            start_date,
+            end_date,
+        }) => {
+            let usage =
+                get_usage_by_date(base_url, auth_token, site_id, start_date, end_date).await?;
+            let usage_json = serde_json::to_string(&usage)?;
+            println!("{}", usage_json);
         }
-    }
-
-    async fn get_user_site_id(base_url: String, auth_token: String) -> Result<String> {
-        let user_site_data = get_site_data(base_url, auth_token).await?;
-        let user_site_id = user_site_data.id;
-        Ok(user_site_id)
     }
 
     Ok(())
