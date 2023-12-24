@@ -8,11 +8,9 @@ This tool will return price and usage data in JSON format based on the CLI comma
 
 ## Setup
 
-1.
-Rename `config.toml.example` to `config.toml`.
+1. Rename `config.toml.example` to `config.toml`.
 
-2.
-You will need to create a API token in your account page first.
+2.You will need to create a API token in your account page first.
 Then in the `config.toml` fill out the `apitoken` sections with your API token `name` and the key in the `psk` section.
 
 
@@ -71,7 +69,8 @@ Arguments:
 
 ## What future features are planned?
 
+* Save historical prices to a CSV file.
 * Daemon mode to emit price or usage data on a regular interval.
+* Other output formats aside from JSON.
 * Sending price alerts to local devices.
-* Sending data points to Grafana cloud.
 * Working with Home Assistant.
