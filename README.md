@@ -10,7 +10,7 @@ This tool will return price and usage data in JSON format based on the CLI comma
 
 1. Rename `config.toml.example` to `config.toml`.
 
-2.You will need to create a API token in your account page first.
+2. You will need to create a API token in your account page first.
 Then in the `config.toml` fill out the `apitoken` sections with your API token `name` and the key in the `psk` section.
 
 
