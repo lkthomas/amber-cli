@@ -1,3 +1,11 @@
+//! This crate provides a CLI interface to interface to Amber Energy's REST API.
+//! Amber energy is an Australia power retailer.
+//! This tool will let you query the available endpoint's offered.
+//! Fetching the data and returning it as a JSON encoded dataset.
+//!
+//! [Amber Energy]: https://www.amber.com.au
+//! [Amber API documentation]: https://app.amber.com.au/developers/documentation
+
 use anyhow::{Ok, Result};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
