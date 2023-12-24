@@ -1,13 +1,20 @@
 [package]
 name = "amber-client"
-version = "0.1.0"
+authors = ["Brendan Horan"]
+license = "BSD 3-Clause License"
+readme = "README.md"
+homepage = "https://github.com/brendanhoran/amber-cli"
+description = "ClI tool to access the Amber energy REST API"
+categories = ["command-line-utilities"]
 edition = "2021"
+version = "0.1.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
 
 [dependencies]
 reqwest = { version = "0.11", features = ["json"] }
-tokio = { version = "1", features = ["full"] }  # for our async runtime
+tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0.75"
@@ -17,7 +24,6 @@ chrono = "0.4.30"
 dateparser = "0.2.0"
 thiserror = "1.0.48"
 clap = { version = "4.4.11", features = ["derive"] }
-exitcode = "1.1.2"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt", "macros"] }
