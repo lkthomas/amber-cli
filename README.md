@@ -54,8 +54,34 @@ Arguments:
   <END_DATE>    End date of query from
 ```
 
+### Example output from the `current-prices` command:
+```
+[
+  {
+    "type": "CurrentInterval",
+    "date": "2023-12-25T00:00:00.000Z",
+    "duration": 30,
+    "startTime": "2023-12-24T22:30:01.000Z",
+    "endTime": "2023-12-24T23:00:00.000Z",
+    "nemTime": "2023-12-24T23:00:00.000Z",
+    "perKwh": 5.91618,
+    "renewables": 73.719,
+    "spotPerKwh": -4.60785,
+    "channelType": "general",
+    "spikeStatus": "none",
+    "tariffInformation": {
+      "period": "offPeak"
+    },
+    "descriptor": "extremelyLow",
+    "estimate": true
+  }
+]
+```
+
 
 ## What works now?
+
+**Note:** all queries are fixed to the 30min resolution, as this is all Amber supports for now.
 
 * Getting Site details
 * Getting current usage
