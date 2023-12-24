@@ -1,0 +1,6 @@
+[amberconfig]
+base_url = "https://api.amber.com.au/v1"
+
+[apitoken]
+name = "Your API token name"
+psk = "Your PSK for the above API token"
