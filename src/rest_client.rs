@@ -25,7 +25,7 @@ pub struct SiteChannels {
     pub tariff_type: String,
 }
 
-/// Strut type that matches the resulting data from the Amber "/prices" REST endpoint.
+/// Struct type that matches the resulting data from the Amber "/prices" REST endpoint.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CurrentPrices {

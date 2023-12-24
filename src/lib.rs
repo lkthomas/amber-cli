@@ -73,7 +73,7 @@ pub async fn get_usage_by_date(
 
 /// Function to validate the user has supplied the date in the correct format and that
 /// the date is a valid calender date.
-///
+/// Will exit the application of the date format is wrong or invalid.
 pub async fn parse_date_naive(date: String) -> Result<String> {
     let naive_date = match NaiveDate::parse_from_str(&date, "%Y-%m-%d") {
         Ok(date) => date,
