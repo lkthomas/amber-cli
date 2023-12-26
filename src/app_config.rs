@@ -18,7 +18,14 @@ pub struct ApiToken {
 #[allow(unused)]
 pub struct AppConfig {
     pub amberconfig: AmberConfig,
+    pub userconfig: UserConfig,
     pub apitoken: ApiToken,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
+pub struct UserConfig {
+    pub state: String,
 }
 
 impl AppConfig {
