@@ -1,5 +1,5 @@
-use amber_client::rest_client::RestClient;
 use amber_client::parse_date_naive;
+use amber_client::rest_client::RestClient;
 
 use wiremock::matchers::{header, method};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -90,7 +90,10 @@ async fn valid_json_parsing_for_site_details() {
 
     let test_site_details_request = user_site_details.get_site_data().await.unwrap();
 
-    assert_eq!(test_site_details_request, mock_data::site_details_json_struct());
+    assert_eq!(
+        test_site_details_request,
+        mock_data::site_details_json_struct()
+    );
 }
 /// Test case to check we handle unauthorized access attempts to Amber's API.
 #[tokio::test]
@@ -115,10 +118,8 @@ async fn unauthorized_api_access() {
 /// Test our date validator function returns a validated date
 #[tokio::test]
 async fn date_validator_parser_valid_date() {
-
     let valid_date_string = "2023-12-31".to_string();
     let test_date_result = parse_date_naive(valid_date_string).await.unwrap();
 
     assert_eq!(test_date_result, "2023-12-31".to_string());
-
 }
