@@ -182,4 +182,22 @@ impl RestClient {
 
         Ok(response)
     }
+
+    /// RustClient function to request data from the Amber "/renewables" endpoint.
+    pub async fn get_renewables_data(&self) -> Result<Vec<Renewables>> {
+        let auth_token_header = format!("Bearer {}", &self.auth_token);
+
+        let response = self
+            .client
+            .get(&self.url)
+            .header("AUTHORIZATION", auth_token_header)
+            .header("CONTENT_TYPE", "application/json")
+            .header("ACCEPT", "application/json")
+            .send()
+            .await?
+            .json::<Vec<Renewables>>()
+            .await?;
+
+        Ok(response)
+    }
 }
