@@ -80,6 +80,8 @@ pub async fn parse_date_naive(date: String) -> Result<String> {
         Err(_error) => {
             eprintln!("Date must be in the format of year-month-day/yyyy-mm-dd, input of {}, does not match requirements", date);
             eprintln!("Can not querity Amber Api, exiting.");
+            //FIXME: unwind stack correctly
+            // this is not ideal, as it will not unwind the stack and makes it hard to test
             // See sysexits.h for exit code 65: "EX_DATAERR".
             process::exit(65);
         }

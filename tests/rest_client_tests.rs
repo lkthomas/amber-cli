@@ -1,44 +1,64 @@
 use amber_client::rest_client::RestClient;
+use amber_client::parse_date_naive;
 
 use wiremock::matchers::{header, method};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
+/// Mock data used in the REST test cases
 mod mock_data {
     use amber_client::rest_client::SiteChannels;
     use amber_client::rest_client::SiteDetails;
     use iso8601_timestamp::Timestamp;
 
-    pub fn site_details_json_struct() -> SiteDetails {
-        let test_time_date_stamp = "2021-05-05T00:00:00Z";
+    // Test data for the "site-details" as a rust struct
+    pub fn site_details_json_struct() -> Vec<SiteDetails> {
+        let test_time_date_stamp = "2023-08-31T00:00:00.000Z";
         let test_timestamp = Timestamp::parse(test_time_date_stamp).unwrap();
 
-        let site_data = SiteDetails {
-            id: "516659425499187395570254629".to_string(),
-            nmi: "50147919623".to_string(),
+        let site_data = vec![SiteDetails {
+            id: "test_site_id".to_string(),
+            nmi: "1234567890".to_string(),
             channels: vec![SiteChannels {
                 identifier: "E1".to_string(),
                 tariff_type: "general".to_string(),
-                tariff: "A100".to_string(),
+                tariff: "A123".to_string(),
             }],
-            network: "test".to_string(),
-            status: "testing".to_string(),
+            network: "test_network".to_string(),
+            status: "active".to_string(),
             active_from: test_timestamp,
-        };
+        }];
         site_data
     }
 
+    // Raw JSON test data for 'site-details".
     pub fn amber_site_details_json() -> String {
-        r#"[{"id": "516659425499187395570254629", "nmi": "50147919623", 
-        "channels": [{"identifier": "E1", "type": "general", "tariff": "A100"}], "network": "test", 
-        "status": "testing", "activeFrom": "2021-05-05", "closedOn": "2022-05-01"}]"#
-            .to_string()
+        let new_amber_site_details_json = r#"[
+          {
+            "activeFrom": "2023-08-31T00:00:00.000Z",
+            "channels": [
+              {
+                "identifier": "E1",
+                "tariff": "A123",
+                "type": "general"
+              }
+            ],
+            "id": "test_site_id",
+            "network": "test_network",
+            "nmi": "1234567890",
+            "status": "active"
+          }
+       ]"#
+        .to_string();
+        return new_amber_site_details_json;
     }
 
+    // Mock return code for unauthorized access to Amber's REST API
     pub fn amber_401_unauthorized() -> String {
         r#"{"message": "Unauthorized"}"#.to_string()
     }
 }
 
+/// Test that our Rest client has the headers we expect/set and that only one request is sent upstream
 #[tokio::test]
 async fn ensure_correct_headers_are_present_and_get_called_once() {
     let mock_server = MockServer::start().await;
@@ -55,7 +75,7 @@ async fn ensure_correct_headers_are_present_and_get_called_once() {
 
     let _ = user_site_details.get_site_data().await;
 }
-
+/// Test that we can retrieve site-details from the mock data correctly
 #[tokio::test]
 async fn valid_json_parsing_for_site_details() {
     let mock_server = MockServer::start().await;
@@ -70,13 +90,13 @@ async fn valid_json_parsing_for_site_details() {
 
     let test_site_details_request = user_site_details.get_site_data().await.unwrap();
 
-    let test_user_site_data = test_site_details_request
-        .get(0)
-        .expect("Malformed array/invalid index[0]");
-
-    assert_eq!(test_user_site_data, &mock_data::site_details_json_struct());
+    assert_eq!(test_site_details_request, mock_data::site_details_json_struct());
 }
+/// Test case to check we handle unauthorized access attempts to Amber's API.
 #[tokio::test]
+// use should_panic to capture the following:
+// thread 'unauthorized_api_access' panicked at 'called `Result::unwrap()` on an `Err` value: HttpNon200Status
+// { status_code: "401 Unauthorized", body: "{\"message\": \"Unauthorized\"}" }',
 #[should_panic(expected = "401 Unauthorized")]
 async fn unauthorized_api_access() {
     let mock_server = MockServer::start().await;
@@ -90,4 +110,15 @@ async fn unauthorized_api_access() {
         .await;
 
     let _test_site_details_request = unauthorized_access.get_site_data().await.unwrap();
+}
+
+/// Test our date validator function returns a validated date
+#[tokio::test]
+async fn date_validator_parser_valid_date() {
+
+    let valid_date_string = "2023-12-31".to_string();
+    let test_date_result = parse_date_naive(valid_date_string).await.unwrap();
+
+    assert_eq!(test_date_result, "2023-12-31".to_string());
+
 }
