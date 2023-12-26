@@ -5,7 +5,7 @@ use anyhow::Result;
 use chrono::NaiveDate;
 use std::process;
 
-use rest_client::{CurrentPrices, CurrentUsage, RestClient, SiteDetails};
+use rest_client::{CurrentPrices, CurrentUsage, Renewables, RestClient, SiteDetails};
 
 /// Function to get and return only the users Site ID.
 pub async fn get_user_site_id(base_url: String, auth_token: String) -> Result<String> {
@@ -69,6 +69,25 @@ pub async fn get_usage_by_date(
     let mut usage_details = RestClient::new_client(usage_data_url, auth_token.clone());
     let usage_data = usage_details.get_usage_data().await?;
     Ok(usage_data)
+}
+
+// https://api.amber.com.au/v1/state/STATE/renewables/current=30'
+// also supports "previous=" and "next=" , "/renewables/current?previous=1&resolution=30"
+
+/// Function to get percentage of renewables used in the grid for a given state and a given window.
+pub async fn get_renewables(
+    base_url: String,
+    auth_token: String,
+    state: String,
+    window: String,
+) -> Result<Vec<Renewables>> {
+    let price_url = format!(
+        "{}/state/{}/renewables/{}?&resolution=30",
+        base_url, state, window
+    );
+    let renewables_request = RestClient::new_client(price_url, auth_token.clone());
+    let renewables_data = renewables_request.get_renewables_data().await?;
+    Ok(renewables_data)
 }
 
 /// Function to validate the user has supplied the date in the correct format and that
