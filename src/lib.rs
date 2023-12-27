@@ -3,9 +3,8 @@ pub mod rest_client;
 
 use anyhow::Result;
 use chrono::NaiveDate;
-
 use csv::WriterBuilder;
-use std::{error::Error, io, process};
+use std::process;
 
 use rest_client::{CurrentPrices, CurrentUsage, Renewables, RestClient, SiteDetails};
 

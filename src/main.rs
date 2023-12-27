@@ -13,6 +13,7 @@ use std::path::PathBuf;
 use amber_client::app_config::AppConfig;
 use amber_client::{
     get_prices, get_renewables, get_site_data, get_usage_by_date, get_user_site_id,
+    write_data_as_csv_to_file,
 };
 
 // Main CLI options
