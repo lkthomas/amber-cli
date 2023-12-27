@@ -11,7 +11,9 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 use amber_client::app_config::AppConfig;
-use amber_client::{get_prices, get_site_data, get_usage_by_date, get_user_site_id};
+use amber_client::{
+    get_prices, get_renewables, get_site_data, get_usage_by_date, get_user_site_id,
+};
 
 // Main CLI options
 #[derive(Parser)]
@@ -32,16 +34,18 @@ enum Commands {
     CurrentPrice(Window),
     #[command(subcommand)]
     Usage(Dates),
+    #[command(subcommand)]
+    Renewables(Window),
 }
 
 /// Price window to query for data.(current, next, previous)
 #[derive(Parser, Debug)]
 enum Window {
-    /// Current interval pricing estimate.
+    /// Current interval data.
     Current,
-    /// Actual interval pricing.
+    /// Previous interval data.
     Previous,
-    /// Forecast interval pricing.
+    /// Forecast interval data.
     Next,
 }
 /// Date range to query history data for. (Using: yyyy-mm-dd format)
@@ -68,9 +72,10 @@ async fn main() -> Result<()> {
     // read config file
     let config = AppConfig::get(app_config_file).await?;
 
-    // map API token and Amber url from config
+    // map API token, Amber url and users state from config
     let auth_token = config.apitoken.psk;
     let base_url = config.amberconfig.base_url;
+    let users_state = config.userconfig.state;
 
     // Get the Site ID first, so that we can reuse it later without an additonal API call.
     let site_id = get_user_site_id(base_url.clone(), auth_token.clone()).await?;
@@ -94,6 +99,33 @@ async fn main() -> Result<()> {
             let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
             let current_price_data_json = serde_json::to_string(&current_price_data)?;
             println!("{}", current_price_data_json);
+        }
+
+        Commands::Renewables(Window::Current) => {
+            let _window = "current".to_string();
+            let renewables_percent_in_grid_data =
+                get_renewables(base_url, auth_token, users_state, _window).await?;
+            let renewables_percent_in_grid_json =
+                serde_json::to_string(&renewables_percent_in_grid_data)?;
+            println!("{}", renewables_percent_in_grid_json);
+        }
+
+        Commands::Renewables(Window::Previous) => {
+            let _window = "current?previous=1".to_string();
+            let renewables_percent_in_grid_data =
+                get_renewables(base_url, auth_token, users_state, _window).await?;
+            let renewables_percent_in_grid_json =
+                serde_json::to_string(&renewables_percent_in_grid_data)?;
+            println!("{}", renewables_percent_in_grid_json);
+        }
+
+        Commands::Renewables(Window::Next) => {
+            let _window = "current?next=1".to_string();
+            let renewables_percent_in_grid_data =
+                get_renewables(base_url, auth_token, users_state, _window).await?;
+            let renewables_percent_in_grid_json =
+                serde_json::to_string(&renewables_percent_in_grid_data)?;
+            println!("{}", renewables_percent_in_grid_json);
         }
 
         Commands::SiteDetails => {

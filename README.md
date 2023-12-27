@@ -39,9 +39,9 @@ Commands:
 Usage: amber-client --config-file <FILE> current-price <COMMAND>
 
 Commands:
-  current   Current interval pricing estimate
-  previous  Actual interval pricing
-  next      Forecast interval pricing
+  current   Current interval data
+  previous  Previous interval data
+  next      Forecast interval data
   help      Print this message or the help of the given subcommand(s)
 ```
 
@@ -52,6 +52,17 @@ Usage: amber-client usage date-range <START_DATE> <END_DATE>
 Arguments:
   <START_DATE>  Start date to query from
   <END_DATE>    End date of query from
+```
+
+### (renewables) Renewables percentage in your state's grid:
+```
+Usage: amber-client --config-file <FILE> renewables <COMMAND>
+
+Commands:
+  current   Current interval data
+  previous  Previous interval data
+  next      Forecast interval data
+  help      Print this message or the help of the given subcommand(s)
 ```
 
 ### Example output from the `current-prices` command:
@@ -83,14 +94,14 @@ Arguments:
 
 **Note:** all queries are fixed to the 30min resolution, as this is all Amber supports for now.
 
-* Getting Site details
-* Getting current usage
-* Getting price forecasts 
-* Getting historical usage data for a given date range
+* Getting Site details.
+* Getting current usage.
+* Getting price forecasts.
+* Getting historical usage data for a given date range.
+* Getting the percentage of renewables in the grid for your state.
 
 ## What is missing or not working?
 
-* Getting data on the current % of renewables in the grid.
 * Test cases are a work in progress, not a source of truth(Yet!).
 
 ## What future features are planned?

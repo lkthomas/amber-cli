@@ -76,6 +76,19 @@ pub struct CurrentUsage {
     pub tariff_information: TariffInformation,
     pub descriptor: String,
 }
+/// Struct type that matches the resulting data from the Amber "/renewables" REST endpoint.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Renewables {
+    #[serde(rename = "type")]
+    pub price_type: String,
+    pub duration: u8,
+    pub date: Timestamp,
+    pub start_time: Timestamp,
+    pub end_time: Timestamp,
+    pub renewables: f32,
+    pub descriptor: String,
+}
 
 /// Struct type that provides options for our implementation of a reqwest client.
 #[derive(Clone)]
@@ -165,6 +178,24 @@ impl RestClient {
             .send()
             .await?
             .json::<Vec<CurrentUsage>>()
+            .await?;
+
+        Ok(response)
+    }
+
+    /// RustClient function to request data from the Amber "/renewables" endpoint.
+    pub async fn get_renewables_data(&self) -> Result<Vec<Renewables>> {
+        let auth_token_header = format!("Bearer {}", &self.auth_token);
+
+        let response = self
+            .client
+            .get(&self.url)
+            .header("AUTHORIZATION", auth_token_header)
+            .header("CONTENT_TYPE", "application/json")
+            .header("ACCEPT", "application/json")
+            .send()
+            .await?
+            .json::<Vec<Renewables>>()
             .await?;
 
         Ok(response)
