@@ -3,7 +3,9 @@ pub mod rest_client;
 
 use anyhow::Result;
 use chrono::NaiveDate;
-use std::process;
+
+use csv::WriterBuilder;
+use std::{error::Error, io, process};
 
 use rest_client::{CurrentPrices, CurrentUsage, Renewables, RestClient, SiteDetails};
 
@@ -108,4 +110,40 @@ pub async fn parse_date_naive(date: String) -> Result<String> {
 
     let valid_date = naive_date.to_string();
     Ok(valid_date)
+}
+
+/// CVS writer for historical data
+pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<CurrentUsage>) -> Result<()> {
+    // We must use the builder to disable auto header generation.
+    // See: https://docs.rs/csv/latest/csv/struct.Writer.html#structs
+    // struct felid that causes this is "pub tariff_information: TariffInformation"
+    let mut writer = WriterBuilder::new()
+        .has_headers(false)
+        .from_path(file_name)?;
+
+    // Write headers for usage data
+    writer.write_record(&[
+        "Type",
+        "duration",
+        "date",
+        "end_date",
+        "quality",
+        "kwh",
+        "nem_time",
+        "per_kwh",
+        "channel_type",
+        "channel_identifier",
+        "cost",
+        "renewables",
+        "spot_per_kwh",
+        "start_time",
+        "spike_status",
+        "tariff_information",
+        "descriptor",
+    ])?;
+    for data_point in data {
+        writer.serialize(data_point)?;
+        writer.flush()?;
+    }
+    Ok(())
 }
