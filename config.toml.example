@@ -1,6 +1,12 @@
 [amberconfig]
+# Main/base URL for Amber's API - versioned
 base_url = "https://api.amber.com.au/v1"
 
+[userconfig]
+# The state or territory to get renewables data for, in short format. (Eg; vic, qld, nt, etc)
+state = "vic"
+
 [apitoken]
+# API token name and psk created from the dev section in your Amber account
 name = "Your API token name"
 psk = "Your PSK for the above API token"
