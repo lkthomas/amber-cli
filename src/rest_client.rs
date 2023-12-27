@@ -28,7 +28,7 @@ pub struct SiteChannels {
 /// Struct type that matches the resulting data from the Amber "/prices" REST endpoint.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Prices {
+pub struct PriceData {
     // type is a reserved word, so rename it.
     #[serde(rename = "type")]
     pub interval_type: String,
@@ -50,7 +50,7 @@ pub struct Prices {
 /// Struct type that matches the resulting data from the Amber "/usage" REST endpoint.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Usage {
+pub struct UsageData {
     #[serde(rename = "type")]
     pub price_type: String,
     pub duration: u8,
@@ -80,7 +80,7 @@ pub struct TariffInformation {
 /// Struct type that matches the resulting data from the Amber "/renewables" REST endpoint.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Renewables {
+pub struct RenewablesData {
     #[serde(rename = "type")]
     pub price_type: String,
     pub duration: u8,
@@ -149,7 +149,7 @@ impl RestClient {
     }
 
     /// RestClient function to request data from the Amber "/prices" endpoint.
-    pub async fn get_price_data(&mut self) -> Result<Vec<Prices>> {
+    pub async fn get_price_data(&mut self) -> Result<Vec<PriceData>> {
         let auth_token_header = format!("Bearer {}", &self.auth_token);
 
         let response = self
@@ -160,14 +160,14 @@ impl RestClient {
             .header("ACCEPT", "application/json")
             .send()
             .await?
-            .json::<Vec<Prices>>()
+            .json::<Vec<PriceData>>()
             .await?;
 
         Ok(response)
     }
 
     /// RestClient function to request data from the Amber "/usage" endpoint.
-    pub async fn get_usage_data(&mut self) -> Result<Vec<Usage>> {
+    pub async fn get_usage_data(&mut self) -> Result<Vec<UsageData>> {
         let auth_token_header = format!("Bearer {}", &self.auth_token);
 
         let response = self
@@ -178,14 +178,14 @@ impl RestClient {
             .header("ACCEPT", "application/json")
             .send()
             .await?
-            .json::<Vec<Usage>>()
+            .json::<Vec<UsageData>>()
             .await?;
 
         Ok(response)
     }
 
     /// RustClient function to request data from the Amber "/renewables" endpoint.
-    pub async fn get_renewables_data(&self) -> Result<Vec<Renewables>> {
+    pub async fn get_renewables_data(&self) -> Result<Vec<RenewablesData>> {
         let auth_token_header = format!("Bearer {}", &self.auth_token);
 
         let response = self
@@ -196,7 +196,7 @@ impl RestClient {
             .header("ACCEPT", "application/json")
             .send()
             .await?
-            .json::<Vec<Renewables>>()
+            .json::<Vec<RenewablesData>>()
             .await?;
 
         Ok(response)

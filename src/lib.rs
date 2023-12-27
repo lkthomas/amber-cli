@@ -6,7 +6,7 @@ use chrono::NaiveDate;
 use csv::WriterBuilder;
 use std::process;
 
-use rest_client::{Prices, Usage, Renewables, RestClient, SiteDetails};
+use rest_client::{PriceData, RenewablesData, RestClient, SiteDetails, UsageData};
 
 /// Function to get and return only the users Site ID.
 pub async fn get_user_site_id(base_url: String, auth_token: String) -> Result<String> {
@@ -39,7 +39,7 @@ pub async fn get_prices(
     auth_token: String,
     site_id: String,
     window: String,
-) -> Result<Vec<Prices>> {
+) -> Result<Vec<PriceData>> {
     let price_url = format!(
         "{}/sites/{}/prices/{}?&resolution=30",
         base_url, site_id, window
@@ -60,7 +60,7 @@ pub async fn get_usage_by_date(
     site_id: String,
     start_date: String,
     end_date: String,
-) -> Result<Vec<Usage>> {
+) -> Result<Vec<UsageData>> {
     let start_date = parse_date_naive(start_date).await?;
     let end_date = parse_date_naive(end_date).await?;
     let usage_data_url = format!(
@@ -81,7 +81,7 @@ pub async fn get_renewables(
     auth_token: String,
     state: String,
     window: String,
-) -> Result<Vec<Renewables>> {
+) -> Result<Vec<RenewablesData>> {
     let price_url = format!(
         "{}/state/{}/renewables/{}?&resolution=30",
         base_url, state, window
@@ -112,7 +112,7 @@ pub async fn parse_date_naive(date: String) -> Result<String> {
 }
 
 /// CVS writer for historical data
-pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<Usage>) -> Result<()> {
+pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<UsageData>) -> Result<()> {
     // We must use the builder to disable auto header generation.
     // See: https://docs.rs/csv/latest/csv/struct.Writer.html#structs
     // struct felid that causes this is "pub tariff_information: TariffInformation"
