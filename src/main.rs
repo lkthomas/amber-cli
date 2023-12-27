@@ -41,11 +41,11 @@ enum Commands {
 /// Price window to query for data.(current, next, previous)
 #[derive(Parser, Debug)]
 enum Window {
-    /// Current interval pricing estimate.
+    /// Current interval data.
     Current,
-    /// Actual interval pricing.
+    /// Previous interval data.
     Previous,
-    /// Forecast interval pricing.
+    /// Forecast interval data.
     Next,
 }
 /// Date range to query history data for. (Using: yyyy-mm-dd format)
