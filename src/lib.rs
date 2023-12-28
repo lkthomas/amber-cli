@@ -123,7 +123,7 @@ pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<UsageData>) 
     println!("Writing to file: {}", file_name);
 
     // Write headers for usage data
-    writer.write_record(&[
+    writer.write_record([
         "Type",
         "duration",
         "date",

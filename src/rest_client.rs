@@ -137,10 +137,10 @@ impl RestClient {
         match response.status() {
             reqwest::StatusCode::OK => {
                 let response = response.json::<Vec<SiteDetails>>().await?;
-                return Ok(response);
+                Ok(response)
             }
             _ => {
-                return Err(Error::HttpNon200Status {
+                Err(Error::HttpNon200Status {
                     status_code: (response.status().to_string()),
                     body: (response.text().await)?,
                 })
