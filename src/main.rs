@@ -13,6 +13,7 @@ use std::path::PathBuf;
 use amber_client::app_config::AppConfig;
 use amber_client::{
     get_prices, get_renewables, get_site_data, get_usage_by_date, get_user_site_id,
+    write_data_as_csv_to_file,
 };
 
 // Main CLI options
@@ -31,7 +32,7 @@ struct Cli {
 enum Commands {
     SiteDetails,
     #[command(subcommand)]
-    CurrentPrice(Window),
+    Price(Window),
     #[command(subcommand)]
     Usage(Dates),
     #[command(subcommand)]
@@ -49,6 +50,8 @@ enum Window {
     Next,
 }
 /// Date range to query history data for. (Using: yyyy-mm-dd format)
+// Not super keen on the way this is structured, but works for now.
+// Would like the export options to be more obvious.
 #[derive(Clone, Debug, Subcommand)]
 enum Dates {
     DateRange {
@@ -56,6 +59,8 @@ enum Dates {
         start_date: String,
         /// End date of query from.
         end_date: String,
+        /// [Optional] Path to save/export data in CSV format.
+        filename_to_export_to: Option<PathBuf>,
     },
 }
 
@@ -81,20 +86,20 @@ async fn main() -> Result<()> {
     let site_id = get_user_site_id(base_url.clone(), auth_token.clone()).await?;
 
     match cli_args.command {
-        Commands::CurrentPrice(Window::Current) => {
+        Commands::Price(Window::Current) => {
             let _window = "current".to_string();
             let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
             let current_price_data_json = serde_json::to_string(&current_price_data)?;
             println!("{}", current_price_data_json);
         }
-        Commands::CurrentPrice(Window::Previous) => {
+        Commands::Price(Window::Previous) => {
             let _window = "current?previous=1".to_string();
             let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
             let current_price_data_json = serde_json::to_string(&current_price_data)?;
             println!("{}", current_price_data_json);
         }
 
-        Commands::CurrentPrice(Window::Next) => {
+        Commands::Price(Window::Next) => {
             let _window = "current?next=1".to_string();
             let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
             let current_price_data_json = serde_json::to_string(&current_price_data)?;
@@ -137,11 +142,20 @@ async fn main() -> Result<()> {
         Commands::Usage(Dates::DateRange {
             start_date,
             end_date,
+            filename_to_export_to,
         }) => {
             let usage =
                 get_usage_by_date(base_url, auth_token, site_id, start_date, end_date).await?;
-            let usage_json = serde_json::to_string(&usage)?;
-            println!("{}", usage_json);
+
+            // If the Option<path> contains a value then we enter export/save to file mode.
+            if let Some(path) = filename_to_export_to {
+                let new_path = path.display().to_string();
+                write_data_as_csv_to_file(new_path, usage).await?;
+            } else {
+                // Otherwise print to stdout as JSON.
+                let usage_json = serde_json::to_string(&usage)?;
+                println!("{}", usage_json);
+            };
         }
     }
 
