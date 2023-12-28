@@ -1365,9 +1365,9 @@ dependencies = [
 
 [[package]]
 name = "iso8601-timestamp"
-version = "0.2.13"
+version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b599a2ccf1b1add05e7baa73195da19db8c3bac08d4da084d975ae6779330724"
+checksum = "c6891d748dbb2af9fd7ba60dba9c8ecf14c0e6f480ad818f7a40482fa98feb99"
 dependencies = [
  "generic-array 1.0.0",
  "serde",
