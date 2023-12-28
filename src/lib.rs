@@ -118,7 +118,9 @@ pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<UsageData>) 
     // struct felid that causes this is "pub tariff_information: TariffInformation"
     let mut writer = WriterBuilder::new()
         .has_headers(false)
-        .from_path(file_name)?;
+        .from_path(file_name.clone())?;
+
+    println!("Writing to file: {}", file_name);
 
     // Write headers for usage data
     writer.write_record(&[
@@ -140,9 +142,14 @@ pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<UsageData>) 
         "tariff_information",
         "descriptor",
     ])?;
+
+    println!("Writing dataset headers to file...");
+
+    println!("Startng to write records to file...");
     for data_point in data {
         writer.serialize(data_point)?;
         writer.flush()?;
     }
+    println!("Finished writing records to file");
     Ok(())
 }

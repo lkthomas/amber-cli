@@ -57,8 +57,8 @@ enum Dates {
         start_date: String,
         /// End date of query from.
         end_date: String,
-        /// Optional path to save/export data in CSV format.
-        filename_to_export_to: Option<PathBuf>
+        /// [Optional] Path to save/export data in CSV format.
+        filename_to_export_to: Option<PathBuf>,
     },
 }
 
@@ -140,14 +140,14 @@ async fn main() -> Result<()> {
         Commands::Usage(Dates::DateRange {
             start_date,
             end_date,
-            filename_to_export_to
+            filename_to_export_to,
         }) => {
             let usage =
                 get_usage_by_date(base_url, auth_token, site_id, start_date, end_date).await?;
 
             // If the Option<path> contains a value then we enter export/save to file mode.
             if let Some(path) = filename_to_export_to {
-               let new_path = path.display().to_string();
+                let new_path = path.display().to_string();
                 write_data_as_csv_to_file(new_path, usage).await?;
             } else {
                 // Otherwise print to stdout as JSON.
