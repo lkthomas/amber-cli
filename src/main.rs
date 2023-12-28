@@ -50,6 +50,8 @@ enum Window {
     Next,
 }
 /// Date range to query history data for. (Using: yyyy-mm-dd format)
+// Not super keen on the way this is structured, but works for now.
+// Would like the export options to be more obvious.
 #[derive(Clone, Debug, Subcommand)]
 enum Dates {
     DateRange {
