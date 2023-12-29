@@ -139,12 +139,10 @@ impl RestClient {
                 let response = response.json::<Vec<SiteDetails>>().await?;
                 Ok(response)
             }
-            _ => {
-                Err(Error::HttpNon200Status {
-                    status_code: (response.status().to_string()),
-                    body: (response.text().await)?,
-                })
-            }
+            _ => Err(Error::HttpNon200Status {
+                status_code: (response.status().to_string()),
+                body: (response.text().await)?,
+            }),
         }
     }
 
