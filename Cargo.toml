@@ -9,7 +9,7 @@ description = "CLI tool to provide access to Amber Energy's customer REST API"
 categories = ["command-line-utilities"]
 exclude = ["config.toml"]
 edition = "2021"
-version = "0.2.0"
+version = "0.2.1"
 
 [dependencies]
 reqwest = { version = "0.11", features = ["json"] }
@@ -17,7 +17,7 @@ tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0.75"
-iso8601-timestamp = { version ="0.2.15", default-features = false, features = ["serde"] }
+iso8601-timestamp = "0.2.16"
 config = "0.13.1"
 chrono = "0.4.30"
 dateparser = "0.2.0"
