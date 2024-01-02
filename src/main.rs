@@ -10,6 +10,10 @@ use anyhow::{Ok, Result};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
+use tracing::{debug, Instrument};
+use tracing_subscriber::{EnvFilter, prelude::*};
+use tracing_subscriber::fmt::format::FmtSpan;
+
 use amber_client::app_config::AppConfig;
 use amber_client::{
     get_prices, get_renewables, get_site_data, get_usage_by_date, get_user_site_id,
@@ -66,6 +70,19 @@ enum Dates {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Set up a default layer for formating trace/log messages
+    let default_layer_format = tracing_subscriber::fmt::layer()
+        .compact()
+        .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+        .with_target(false);
+
+    // Configure tracing registry and enable tracing
+    tracing_subscriber::registry()
+    .with(default_layer_format)
+    // Read environment variable "RUST_LOG" to determine log level
+    .with(EnvFilter::from_default_env())
+    .try_init()?;
+
     // parse cli input
     let cli_args = Cli::parse();
 
@@ -75,7 +92,9 @@ async fn main() -> Result<()> {
     let app_config_file = cli_args.config_file.display().to_string();
 
     // read config file
-    let config = AppConfig::get(app_config_file).await?;
+    //let load_app_config = debug_span!("Loading app config");
+    debug!("Loaded config file: {}", app_config_file.clone());
+    let config = AppConfig::get(app_config_file).instrument(tracing::debug_span!("some_other_async_function")).await?;
 
     // map API token, Amber url and users state from config
     let auth_token = config.apitoken.psk;
@@ -148,14 +167,16 @@ async fn main() -> Result<()> {
                 get_usage_by_date(base_url, auth_token, site_id, start_date, end_date).await?;
 
             // If the Option<path> contains a value then we enter export/save to file mode.
-            if let Some(path) = filename_to_export_to {
-                let new_path = path.display().to_string();
-                write_data_as_csv_to_file(new_path, usage).await?;
+            println!("{:?}", filename_to_export_to);
+            if filename_to_export_to.is_some() {
+                if let Some(path) = filename_to_export_to {
+                    let new_path = path.display().to_string();
+                    write_data_as_csv_to_file(new_path, usage.clone()).await?;
+                };
             } else {
-                // Otherwise print to stdout as JSON.
                 let usage_json = serde_json::to_string(&usage)?;
                 println!("{}", usage_json);
-            };
+            }
         }
     }
 

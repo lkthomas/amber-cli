@@ -24,6 +24,8 @@ dateparser = "0.2.0"
 thiserror = "1.0.48"
 clap = { version = "4.4.11", features = ["derive"] }
 csv = "1.1"
+tracing = "0.1"
+tracing-subscriber = { version ="0.3", features = ["env-filter"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt", "macros"] }
