@@ -11,8 +11,8 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 use tracing::{debug, Instrument};
-use tracing_subscriber::{EnvFilter, prelude::*};
 use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::{prelude::*, EnvFilter};
 
 use amber_client::app_config::AppConfig;
 use amber_client::{
@@ -78,10 +78,10 @@ async fn main() -> Result<()> {
 
     // Configure tracing registry and enable tracing
     tracing_subscriber::registry()
-    .with(default_layer_format)
-    // Read environment variable "RUST_LOG" to determine log level
-    .with(EnvFilter::from_default_env())
-    .try_init()?;
+        .with(default_layer_format)
+        // Read environment variable "RUST_LOG" to determine log level
+        .with(EnvFilter::from_default_env())
+        .try_init()?;
 
     // parse cli input
     let cli_args = Cli::parse();
@@ -94,7 +94,9 @@ async fn main() -> Result<()> {
     // read config file
     //let load_app_config = debug_span!("Loading app config");
     debug!("Loaded config file: {}", app_config_file.clone());
-    let config = AppConfig::get(app_config_file).instrument(tracing::debug_span!("some_other_async_function")).await?;
+    let config = AppConfig::get(app_config_file)
+        .instrument(tracing::debug_span!("some_other_async_function"))
+        .await?;
 
     // map API token, Amber url and users state from config
     let auth_token = config.apitoken.psk;
