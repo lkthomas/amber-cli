@@ -9,10 +9,11 @@
 use anyhow::{Ok, Result};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
+use time::OffsetDateTime;
 
 use tracing::{debug, Instrument};
 use tracing_subscriber::fmt::format::FmtSpan;
-use tracing_subscriber::{prelude::*, EnvFilter};
+use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 use amber_client::app_config::AppConfig;
 use amber_client::{
@@ -70,10 +71,18 @@ enum Dates {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Set up a default layer for formating trace/log messages
+    //let tracing_timestamp_format = time::format_description::parse(
+    //    "[year]-[month padding:zero]-[day padding:zero] [hour]:[minute]:[second]",
+    //)?;
+
+    //let local_offset = time::UtcOffset::current_local_offset()?;
+    //let tracing_time = fmt::time::OffsetTime::new(local_offset, tracing_timestamp_format);
+
+    // Set up a default layer for formatting trace/log messages
     let default_layer_format = tracing_subscriber::fmt::layer()
         .compact()
-        .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+        .with_span_events(FmtSpan::ACTIVE)
+        //.with_timer(tracing_time)
         .with_target(false);
 
     // Configure tracing registry and enable tracing
@@ -92,10 +101,12 @@ async fn main() -> Result<()> {
     let app_config_file = cli_args.config_file.display().to_string();
 
     // read config file
-    //let load_app_config = debug_span!("Loading app config");
-    debug!("Loaded config file: {}", app_config_file.clone());
-    let config = AppConfig::get(app_config_file)
-        .instrument(tracing::debug_span!("some_other_async_function"))
+    let config = AppConfig::get(app_config_file.clone())
+        .instrument(tracing::debug_span!(
+            "Load config file",
+            "File={}",
+            app_config_file
+        ))
         .await?;
 
     // map API token, Amber url and users state from config
@@ -169,6 +180,7 @@ async fn main() -> Result<()> {
                 get_usage_by_date(base_url, auth_token, site_id, start_date, end_date).await?;
 
             // If the Option<path> contains a value then we enter export/save to file mode.
+            // Otherwise None will fall back to print to stdout as normal.
             match filename_to_export_to {
                 Some(filename) => {
                     let filename_as_string = filename.display().to_string();
