@@ -169,15 +169,16 @@ async fn main() -> Result<()> {
                 get_usage_by_date(base_url, auth_token, site_id, start_date, end_date).await?;
 
             // If the Option<path> contains a value then we enter export/save to file mode.
-            println!("{:?}", filename_to_export_to);
-            if filename_to_export_to.is_some() {
-                if let Some(path) = filename_to_export_to {
-                    let new_path = path.display().to_string();
-                    write_data_as_csv_to_file(new_path, usage.clone()).await?;
-                };
-            } else {
-                let usage_json = serde_json::to_string(&usage)?;
-                println!("{}", usage_json);
+            match filename_to_export_to {
+                Some(filename) => {
+                    let filename_as_string = filename.display().to_string();
+                    write_data_as_csv_to_file(filename_as_string, usage.clone()).await?;
+                    //println!("file: {:?}", filename);
+                }
+                None => {
+                    let usage_json = serde_json::to_string(&usage)?;
+                    println!("{}", usage_json);
+                }
             }
         }
     }

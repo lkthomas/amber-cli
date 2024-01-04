@@ -120,7 +120,7 @@ pub async fn parse_date_naive(date: String) -> Result<String> {
 }
 
 /// CVS writer for historical data
-#[tracing::instrument(level = "info")]
+#[tracing::instrument(level = "debug")]
 pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<UsageData>) -> Result<()> {
     // We must use the builder to disable auto header generation.
     // See: https://docs.rs/csv/latest/csv/struct.Writer.html#structs
