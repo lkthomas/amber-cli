@@ -78,12 +78,27 @@ enum Dates {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    //let tracing_timestamp_format = time::format_description::parse(
-    //    "[year]-[month padding:zero]-[day padding:zero] [hour]:[minute]:[second]",
-    //)?;
+    /*
+    Not done but would like to do this correctly, hence the code block comment.
 
-    //let local_offset = time::UtcOffset::current_local_offset()?;
-    //let tracing_time = fmt::time::OffsetTime::new(local_offset, tracing_timestamp_format);
+    // Set up a date format for tracing
+    let tracing_timestamp_format = time::format_description::parse(
+        "[year]-[month padding:zero]-[day padding:zero] [hour]:[minute]:[second]",
+    )?;
+
+    The following is Not supported..
+    https://docs.rs/time/latest/time/struct.UtcOffset.html#method.current_local_offset
+    Needs, local crate feature local-offset only
+    This is known to cause segfaults, since getenv in localtime_r is not thread safe
+    https://github.com/time-rs/time/issues/293
+
+    // Get users local UTC offset
+    let local_offset = time::UtcOffset::current_local_offset()?;
+
+    // Build the time stamp format
+    let tracing_time = fmt::time::OffsetTime::new(local_offset, tracing_timestamp_format);
+    // Then dd tracing_time to fmt::Layer as .with_timer().
+    */
 
     // parse cli input
     let cli_args = Cli::parse();
