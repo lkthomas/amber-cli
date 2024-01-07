@@ -38,9 +38,10 @@ struct Cli {
     command: Commands,
 }
 
-/// Commands to interact with the Amber API.
+/// Commands to interact with the Amber API
 #[derive(Subcommand, Debug)]
 enum Commands {
+    /// Display details about your site.
     SiteDetails,
     #[command(subcommand)]
     Price(Window),
@@ -50,7 +51,7 @@ enum Commands {
     Renewables(Window),
 }
 
-/// Price window to query for data.(current, next, previous)
+/// Price window to query for data (current, next, previous)
 #[derive(Parser, Debug)]
 enum Window {
     /// Current interval data.
@@ -60,7 +61,7 @@ enum Window {
     /// Forecast interval data.
     Next,
 }
-/// Date range to query history data for. (Using: yyyy-mm-dd format)
+/// Date range to query history data for (Using: yyyy-mm-dd format)
 // Not super keen on the way this is structured, but works for now.
 // Would like the export options to be more obvious.
 #[derive(Clone, Debug, Subcommand)]
