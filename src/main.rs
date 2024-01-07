@@ -8,12 +8,13 @@
 
 use anyhow::{Ok, Result};
 use clap::{Parser, Subcommand};
+use std::env;
 use std::path::PathBuf;
-use time::OffsetDateTime;
 
 use tracing::{debug, Instrument};
+use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::format::FmtSpan;
-use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use tracing_subscriber::{prelude::*, EnvFilter};
 
 use amber_client::app_config::AppConfig;
 use amber_client::{
@@ -25,8 +26,13 @@ use amber_client::{
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    #[arg(short, long, value_name = "FILE")]
+    /// Full path to config.toml file.
+    #[arg(short, long, value_name = "config.toml")]
     config_file: PathBuf,
+
+    /// Enable debug logging, defaults to off.
+    #[arg(short, long, default_missing_value("true"), default_value("false"))]
+    debug: bool,
 
     #[command(subcommand)]
     command: Commands,
@@ -78,6 +84,39 @@ async fn main() -> Result<()> {
     //let local_offset = time::UtcOffset::current_local_offset()?;
     //let tracing_time = fmt::time::OffsetTime::new(local_offset, tracing_timestamp_format);
 
+    // parse cli input
+    let cli_args = Cli::parse();
+
+    // Less then ideal as tracing_subscriber::reload can not update a Layer as a async task
+    // https://github.com/tokio-rs/tracing/issues/738#issuecomment-635517004
+    // For now if the "-d / --debug" flag is present/true then just overwrite the "RUST_LOG".
+    // This will overwrite anything the user as set for this env_var.
+    // Print warning via println as tracing_subscriber is not Initializing yet.
+    match cli_args.debug {
+        true => {
+            println!("WARNING!");
+            println!(
+                "WARNING!{:>25} mode overrides the RUST_LOG environmental variable!",
+                "DEBUG"
+            );
+            println!(
+                "WARNING!{0:>25} will be set as the RUST_LOG environmental variable.",
+                "DEBUG"
+            );
+            env::set_var("RUST_LOG", "DEBUG");
+            println!(
+                "WARNING!{0:>28} environmental variable has been set.",
+                "RUST_LOG"
+            );
+            println!("WARNING!");
+        }
+        false => (),
+    }
+
+    let logging_filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env_lossy();
+
     // Set up a default layer for formatting trace/log messages
     let default_layer_format = tracing_subscriber::fmt::layer()
         .compact()
@@ -89,11 +128,19 @@ async fn main() -> Result<()> {
     tracing_subscriber::registry()
         .with(default_layer_format)
         // Read environment variable "RUST_LOG" to determine log level
-        .with(EnvFilter::from_default_env())
+        //.with(EnvFilter::from_default_env())
+        .with(logging_filter)
         .try_init()?;
 
-    // parse cli input
-    let cli_args = Cli::parse();
+    // show actual trace level set for tracing_subscriber.
+    debug!(
+        "Trace logging enabled. Configured log level is: {}",
+        tracing_subscriber::filter::LevelFilter::current()
+    );
+
+    // Do not print users API keys to any log event.
+    // Due to skipping the 'api_token' field on configured instruments.
+    debug!("Debug traces/spans will not print your API key. Due to purposefully skipping the 'api_token' field.");
 
     // map the CLI argument of "config_file: PathBuf" to a string, using lossy conversion
     // making this is safe to use with non uni-code data.
@@ -114,7 +161,7 @@ async fn main() -> Result<()> {
     let base_url = config.amberconfig.base_url;
     let users_state = config.userconfig.state;
 
-    // Get the Site ID first, so that we can reuse it later without an additonal API call.
+    // Get the Site ID first, so tha`t we can reuse it later without an additonal API call.
     let site_id = get_user_site_id(base_url.clone(), auth_token.clone()).await?;
 
     match cli_args.command {
