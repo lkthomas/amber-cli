@@ -10,7 +10,6 @@ use tracing::info;
 
 use rest_client::{PriceData, RenewablesData, RestClient, SiteDetails, UsageData};
 
-
 /// Function to get and return only the users Site ID.
 #[tracing::instrument(level = "debug", skip(auth_token))]
 pub async fn get_user_site_id(base_url: String, auth_token: String) -> Result<String> {
