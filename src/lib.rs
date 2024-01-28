@@ -162,3 +162,23 @@ pub async fn write_data_as_csv_to_file(file_name: String, data: Vec<UsageData>) 
     info!("Finished writing records to file");
     Ok(())
 }
+
+/// Function to return the spike status from the current price Interval.
+/// Only valid for the current Interval.
+#[tracing::instrument(level = "debug")]
+pub async fn get_spike_status(
+    base_url: String,
+    auth_token: String,
+    site_id: String,
+) -> Result<String> {
+    let current_price_data =
+        get_prices(base_url, auth_token, site_id, "current".to_string()).await?;
+
+    let current_spike_status = match current_price_data[0].spike_status.as_str() {
+        "none" => "Interval has no spike".to_string(),
+        "potential" => "Interval has potential to spike.".to_string(),
+        "spike" => "Interval spiking".to_string(),
+        _ => "Unknown spike status".to_string(),
+    };
+    Ok(current_spike_status)
+}
