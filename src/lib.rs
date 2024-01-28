@@ -10,11 +10,6 @@ use tracing::info;
 
 use rest_client::{PriceData, RenewablesData, RestClient, SiteDetails, UsageData};
 
-pub enum SpikeStatus {
-    None,
-    Potential,
-    Spike,
-}
 
 /// Function to get and return only the users Site ID.
 #[tracing::instrument(level = "debug", skip(auth_token))]
