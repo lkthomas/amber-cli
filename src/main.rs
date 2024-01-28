@@ -18,8 +18,8 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 use amber_client::app_config::AppConfig;
 use amber_client::{
-    get_prices, get_renewables, get_site_data, get_usage_by_date, get_user_site_id,
-    write_data_as_csv_to_file,
+    get_prices, get_renewables, get_site_data, get_spike_status, get_usage_by_date,
+    get_user_site_id, write_data_as_csv_to_file,
 };
 
 // Main CLI options
@@ -49,6 +49,8 @@ enum Commands {
     Usage(Dates),
     #[command(subcommand)]
     Renewables(Window),
+    /// Current interval's spike status.
+    Spike,
 }
 
 /// Price window to query for data (current, next, previous)
@@ -232,6 +234,11 @@ async fn main() -> Result<()> {
             let site_data = get_site_data(base_url, auth_token).await?;
             let site_data_json = serde_json::to_string(&site_data)?;
             println!("{}", site_data_json);
+        }
+
+        Commands::Spike => {
+            let current_spike_status = get_spike_status(base_url, auth_token, site_id).await?;
+            println!("{}", current_spike_status);
         }
 
         Commands::Usage(Dates::DateRange {
