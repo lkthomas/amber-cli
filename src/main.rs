@@ -22,6 +22,7 @@ use amber_client::{
     get_user_site_id, write_data_as_csv_to_file,
 };
 
+use serde_yaml;
 // Main CLI options
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -33,6 +34,10 @@ struct Cli {
     /// Enable debug logging, defaults to off.
     #[arg(short, long, default_missing_value("true"), default_value("false"))]
     debug: bool,
+
+    /// Output format: json or yaml
+    #[arg(short, long, default_value = "json")]
+    format: String,
 
     #[command(subcommand)]
     command: Commands,
@@ -104,6 +109,9 @@ async fn main() -> Result<()> {
 
     // parse cli input
     let cli_args = Cli::parse();
+
+    // Determine the output format
+    let output_format = cli_args.format.to_lowercase();
 
     // Less then ideal as tracing_subscriber::reload can not update a Layer as a async task
     // https://github.com/tokio-rs/tracing/issues/738#issuecomment-635517004
@@ -186,21 +194,25 @@ async fn main() -> Result<()> {
         Commands::Price(Window::Current) => {
             let _window = "current".to_string();
             let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
-            let current_price_data_json = serde_json::to_string(&current_price_data)?;
-            println!("{}", current_price_data_json);
+            // let current_price_data_json = serde_json::to_string(&current_price_data)?;
+            print_output(&current_price_data, &output_format)?;
+            // println!("{}", current_price_data_json);
         }
         Commands::Price(Window::Previous) => {
             let _window = "current?previous=1".to_string();
             let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
-            let current_price_data_json = serde_json::to_string(&current_price_data)?;
-            println!("{}", current_price_data_json);
+            // let current_price_data_json = serde_json::to_string(&current_price_data)?;
+            print_output(&current_price_data, &output_format)?;
+            // println!("{}", current_price_data_json);
+
         }
 
         Commands::Price(Window::Next) => {
             let _window = "current?next=1".to_string();
             let current_price_data = get_prices(base_url, auth_token, site_id, _window).await?;
-            let current_price_data_json = serde_json::to_string(&current_price_data)?;
-            println!("{}", current_price_data_json);
+            // let current_price_data_json = serde_json::to_string(&current_price_data)?;
+            print_output(&current_price_data, &output_format)?;
+            // println!("{}", current_price_data_json);
         }
 
         Commands::Renewables(Window::Current) => {
@@ -265,5 +277,20 @@ async fn main() -> Result<()> {
         }
     }
 
+    Ok(())
+}
+
+// The print_output function is only used by the price command
+fn print_output<T: serde::Serialize>(data: &T, format: &str) -> Result<(), anyhow::Error> {
+    match format {
+        "yaml" => {
+            let yaml_output = serde_yaml::to_string(data)?;
+            println!("{}", yaml_output);
+        }
+        "json" | _ => {
+            let json_output = serde_json::to_string(data)?;
+            println!("{}", json_output);
+        }
+    }
     Ok(())
 }

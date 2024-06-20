@@ -1,6 +1,5 @@
 use config::{Config, ConfigError, File};
 use serde::Deserialize;
-
 #[derive(Debug, Deserialize)]
 #[allow(unused)]
 pub struct AmberConfig {
